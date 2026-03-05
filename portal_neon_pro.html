@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0c">
+    
+    <title>Portal Neon - Escola Ana Facó</title>
+    <style>
+        :root { --neon-blue: #00f3ff; --neon-pink: #ff00e6; --bg-dark: #0a0a0c; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        ::-webkit-scrollbar { display: none; }
+        body { background: var(--bg-dark); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; touch-action: pan-y; -ms-overflow-style: none; scrollbar-width: none; }
+        
+        header { width: 100%; text-align: center; padding: 8px; border-bottom: 2px solid var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); background: rgba(0,0,0,0.8); flex-shrink: 0; }
+        header h1 { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); font-size: 1.3rem; margin-top: 5px; }
+        header p { font-size: 0.8rem; margin-top: 2px; }
+        
+        .screen { display: none; width: 100%; max-width: 600px; padding: 12px; flex-direction: column; align-items: center; }
+        .screen.active { display: flex; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        input { width: 100%; padding: 10px; margin-bottom: 8px; background: transparent; border: 2px solid var(--neon-blue); color: white; border-radius: 8px; text-align: center; font-size: 1.1rem; }
+        input:focus { outline: none; box-shadow: 0 0 10px var(--neon-blue); }
+        
+        .btn { width: 100%; padding: 8px; border: 1px solid var(--neon-pink); background: transparent; color: white; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 6px; text-transform: uppercase; }
+        .btn:hover:not(:disabled) { background: var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn.correct { background: #39ff14; border-color: #39ff14; color: black; box-shadow: 0 0 15px #39ff14; }
+        .btn.wrong { background: #ff003c; border-color: #ff003c; color: white; box-shadow: 0 0 15px #ff003c; }
+
+        .btn-voltar { border-color: #555; color: #ccc; margin-top: 5px; font-size: 0.85rem; padding: 8px; }
+        .btn-voltar:hover { background: #333; box-shadow: none; border-color: #777; color: white; }
+
+        .timer-container { position: relative; width: 55px; height: 55px; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; }
+        .timer-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+        .timer-circle-bg { fill: none; stroke: rgba(255, 255, 255, 0.1); stroke-width: 5; }
+        .timer-circle-path { fill: none; stroke: var(--neon-blue); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 173; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear, stroke 0.5s ease; }
+        .timer-text { font-size: 1.2rem; font-weight: bold; z-index: 2; text-shadow: 0 0 5px var(--neon-blue); }
+
+        #question-text { font-size: 1.1rem; text-align: center; margin-bottom: 12px; min-height: 40px; font-weight: bold;}
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+        
+        .status-bar { width: 100%; display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; color: var(--neon-pink); }
+        
+        #loading-msg { color: #39ff14; margin-top: 5px; display: none; font-weight: bold; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="https://i.postimg.cc/sBm64nrV/logotipo-Ana-Faco.jpg" alt="Logo Escola Ana Facó" style="width: 60px; border-radius: 8px; margin-bottom: 2px; box-shadow: 0 0 8px var(--neon-blue);">
+        <h1>ESCOLA ANA FACÓ</h1>
+        <p>Portal de Quizzes Interativos</p>
+    </header>
+
+    <div id="screen-start" class="screen active">
+        <h2 style="margin-bottom: 8px; font-size: 1.2rem; color: var(--neon-pink);">Identificação</h2>
+        <input type="text" id="player-name" placeholder="Seu Nome Completo">
+        
+        <h3 style="margin: 8px 0; font-size: 1rem; color: white;">Escolha a Disciplina:</h3>
+        <div class="menu-grid">
+            <button class="btn" onclick="iniciarQuiz('Português')">Português</button>
+            <button class="btn" onclick="iniciarQuiz('Matemática')">Matemática</button>
+            <button class="btn" onclick="iniciarQuiz('Biologia')">Biologia</button>
+            <button class="btn" onclick="iniciarQuiz('Física')">Física</button>
+            <button class="btn" onclick="iniciarQuiz('Química')">Química</button>
+            <button class="btn" onclick="iniciarQuiz('História')">História</button>
+            <button class="btn" onclick="iniciarQuiz('Geografia')">Geografia</button>
+            <button class="btn" onclick="iniciarQuiz('Sociologia')">Sociologia</button>
+            <button class="btn" onclick="iniciarQuiz('Filosofia')">Filosofia</button>
+            <button class="btn" onclick="iniciarQuiz('Inglês')">Inglês</button>
+            <button class="btn" onclick="iniciarQuiz('Arte')">Arte</button>
+            <button class="btn" onclick="iniciarQuiz('Redação')">Redação</button>
+            <button class="btn" onclick="iniciarQuiz('Ed. Física')">Ed. Física</button>
+            <button class="btn" onclick="iniciarQuiz('FPC')">FPC</button>
+            <button class="btn" style="grid-column: span 2;" onclick="iniciarQuiz('Eletivas')">Eletivas</button>
+        </div>
+        <p id="loading-msg">Conectando ao Banco de Dados...</p>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+        <div class="status-bar">
+            <span id="materia-titulo">Disciplina</span>
+            <span id="contador-questao">1/20</span>
+        </div>
+
+        <div class="timer-container">
+            <svg class="timer-svg" viewBox="0 0 60 60">
+                <circle class="timer-circle-bg" cx="30" cy="30" r="27"></circle>
+                <circle id="timer-path" class="timer-circle-path" cx="30" cy="30" r="27"></circle>
+            </svg>
+            <div id="timer-text" class="timer-text">20</div>
+        </div>
+
+        <div id="question-text">Carregando pergunta...</div>
+        <div id="options-container" style="width: 100%; display: flex; flex-direction: column; gap: 5px;"></div>
+        
+        <button class="btn btn-voltar" onclick="voltarInicio()">🔙 VOLTAR AO MENU</button>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <h2 style="font-size: 2rem; color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue);">FIM DE JOGO!</h2>
+        <div id="score-display" style="font-size: 3.5rem; font-weight: bold; margin: 10px 0;">0/20</div>
+        <p id="feedback-db" style="color: var(--neon-pink); margin-bottom: 10px; font-size: 0.9rem;">Enviando dados para o Coordenador...</p>
+        <button class="btn btn-voltar" onclick="voltarInicio()">🔙 VOLTAR AO MENU</button>
+    </div>
+
+    <audio id="audio-bg" loop src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=tension-103701.mp3"></audio>
+    <audio id="audio-correct" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=success-1-6297.mp3"></audio>
+    <audio id="audio-wrong" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_c6ccf3232f.mp3?filename=error-126627.mp3"></audio>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBCVLhvXUiIzd2EA71lj7D0GSXmOfqaxS8",
+        authDomain: "quiz-ana-faco-2026.firebaseapp.com",
+        projectId: "quiz-ana-faco-2026",
+        storageBucket: "quiz-ana-faco-2026.firebasestorage.app",
+        messagingSenderId: "17112805627",
+        appId: "1:17112805627:web:0fb61b6f68fc94605dc05e"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const GIST_URL = "https://gist.githubusercontent.com/cincoregioes-star/1897ff94fb90539ac5fca4c6fccc714e/raw/banco_anafaco.json";
+    
+    let bancoOnline = {};
+    let questoesAtuais = [];
+    let qIndex = 0;
+    let score = 0;
+    let nomeAluno = "";
+    let materiaAtual = "";
+    let timeLeft = 20;
+    let timerInterval;
+    let relatorioRespostas = [];
+
+    const audioBg = document.getElementById('audio-bg');
+    const audioCorrect = document.getElementById('audio-correct');
+    const audioWrong = document.getElementById('audio-wrong');
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function embaralharArray(array) {
+        let copia = [...array];
+        for (let i = copia.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copia[i], copia[j]] = [copia[j], copia[i]];
+        }
+        return copia;
+    }
+
+    async function iniciarQuiz(materia) {
+        nomeAluno = document.getElementById('player-name').value;
+        if(nomeAluno.length < 3) return alert("Por favor, digite seu nome completo!");
+        
+        document.getElementById('loading-msg').style.display = 'block';
+
+        const urlSemCache = GIST_URL + "?v=" + new Date().getTime();
+
+        try {
+            const resposta = await fetch(urlSemCache);
+            bancoOnline = await resposta.json();
+        } catch (error) {
+            document.getElementById('loading-msg').style.display = 'none';
+            return alert("Erro de conexão com o banco de questões. Verifique sua internet.");
+        }
+
+        document.getElementById('loading-msg').style.display = 'none';
+
+        if(!bancoOnline[materia] || bancoOnline[materia].length === 0) {
+            return alert("Ainda não existem questões prontas para a disciplina de " + materia + ".");
+        }
+
+        materiaAtual = materia;
+        
+        let todasAsQuestoes = bancoOnline[materia];
+        let questoesMisturadas = embaralharArray(todasAsQuestoes);
+        questoesAtuais = questoesMisturadas.slice(0, 20);
+        
+        qIndex = 0;
+        score = 0;
+        relatorioRespostas = [];
+        
+        document.getElementById('screen-start').classList.remove('active');
+        document.getElementById('screen-quiz').classList.add('active');
+        document.getElementById('materia-titulo').innerText = materia;
+        
+        audioBg.volume = 0.1;
+        audioBg.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+        
+        mostrarQuestao();
+    }
+
+    function voltarInicio() {
+        clearInterval(timerInterval);
+        audioBg.pause();
+        audioBg.currentTime = 0;
+        document.getElementById('screen-quiz').classList.remove('active');
+        document.getElementById('screen-result').classList.remove('active');
+        document.getElementById('screen-start').classList.add('active');
+    }
+
+    function mostrarQuestao() {
+        if(qIndex >= questoesAtuais.length) return finalizar();
+        
+        const q = questoesAtuais[qIndex];
+        document.getElementById('contador-questao').innerText = `${qIndex + 1}/${questoesAtuais.length}`;
+        document.getElementById('question-text').innerText = q.q;
+        
+        let html = "";
+        q.o.forEach((opt, i) => {
+            html += `<button class="btn option-btn" onclick="responder(${i}, this)">${opt}</button>`;
+        });
+        document.getElementById('options-container').innerHTML = html;
+        
+        iniciarCronometro();
+    }
+
+    function iniciarCronometro() {
+        clearInterval(timerInterval);
+        timeLeft = 20;
+        document.getElementById('timer-text').innerText = timeLeft;
+        document.getElementById('timer-path').style.strokeDashoffset = '0';
+        document.getElementById('timer-path').style.stroke = 'var(--neon-blue)';
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer-text').innerText = timeLeft;
+            const offset = 173 - (timeLeft / 20) * 173; 
+            document.getElementById('timer-path').style.strokeDashoffset = offset;
+
+            if(timeLeft <= 5) {
+                document.getElementById('timer-path').style.stroke = '#ff003c';
+                document.getElementById('timer-text').style.color = '#ff003c';
+                if(timeLeft > 0) playBeep();
+            }
+
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                processarResposta(-1, null);
+            }
+        }, 1000);
+    }
+
+    function playBeep() {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = 800;
+        gain.gain.value = 0.1;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    function responder(i, btnElement) {
+        clearInterval(timerInterval);
+        processarResposta(i, btnElement);
+    }
+
+    function processarResposta(i, btnElement) {
+        const botoes = document.querySelectorAll('.option-btn');
+        botoes.forEach(b => b.disabled = true);
+
+        const perguntaAtual = questoesAtuais[qIndex];
+        const corretoIndex = perguntaAtual.c;
+        
+        const textoDaPergunta = perguntaAtual.q;
+        const textoCorreto = perguntaAtual.o[corretoIndex];
+        const textoDoAluno = i === -1 ? "Tempo Esgotado" : perguntaAtual.o[i];
+        
+        relatorioRespostas.push({
+            questao_numero: qIndex + 1,
+            pergunta: textoDaPergunta,
+            resposta_do_aluno: textoDoAluno,
+            resposta_correta: textoCorreto,
+            resultado: (i === corretoIndex) ? "Acertou" : "Errou"
+        });
+
+        if(i === corretoIndex) {
+            if(btnElement) btnElement.classList.add('correct');
+            audioCorrect.currentTime = 0; audioCorrect.play();
+            score++;
+        } else {
+            if(btnElement) btnElement.classList.add('wrong');
+            botoes[corretoIndex].classList.add('correct');
+            audioWrong.currentTime = 0; audioWrong.play();
+        }
+
+        setTimeout(() => {
+            qIndex++;
+            mostrarQuestao();
+        }, 1800);
+    }
+
+    async function finalizar() {
+        clearInterval(timerInterval);
+        audioBg.pause();
+        document.getElementById('screen-quiz').classList.remove('active');
+        document.getElementById('screen-result').classList.add('active');
+        document.getElementById('score-display').innerText = `${score}/${questoesAtuais.length}`;
+
+        try {
+            await db.collection("resultadosAnaFaco").add({
+                aluno: nomeAluno,
+                materia: materiaAtual,
+                pontos: score,
+                total_questoes: questoesAtuais.length,
+                data: new Date(),
+                detalhe_gabarito: relatorioRespostas
+            });
+            document.getElementById('feedback-db').innerText = "Dados e gabarito enviados com sucesso!";
+        } catch (e) {
+            document.getElementById('feedback-db').innerText = "Erro ao salvar no banco de dados.";
+            console.error(e);
+        }
+    }
+</script>
+</body>
+</html>
