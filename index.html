@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Portal Neon - Acesso Restrito</title>
+    <style>
+        body{background:#000;color:#0f0;font-family:monospace;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+        #login-box{border:1px solid #0f0;padding:30px;text-align:center;box-shadow:0 0 20px #0f0;background:#050505;border-radius:10px}
+        input{display:block;margin:10px auto;padding:12px;background:#000;border:1px solid #0f0;color:#0f0;width:250px;border-radius:5px}
+        button{padding:12px 25px;background:#0f0;color:#000;border:none;cursor:pointer;font-weight:700;border-radius:5px;width:100%;text-transform:uppercase}
+    </style>
+</head>
+<body oncontextmenu="return false">
+
+<div id="login-box">
+    <h2>⚡ PORTAL NEON ⚡</h2>
+    <p>VALIDAÇÃO DE LICENÇA</p>
+    <input type="email" id="u_email" placeholder="E-mail cadastrado">
+    <input type="text" id="u_key" maxlength="4" placeholder="Chave (Ex: KX82)">
+    <button onclick="v()">DESBLOQUEAR ACESSO</button>
+    <p style="font-size:10px;color:#444;margin-top:20px">© 2026 Sr. Carlos Tavares - Sistema de Proteção</p>
+</div>
+
+<script>
+// Lista de chaves autorizadas (A primeira é KX82)
+var _0x55=[`KX82`,`AZ21`,`BY33`,`CX44`,`DW55`,`EV66`,`FU77`,`GT88`,`HS99`,`JR10` ];
+
+function v(){
+    var e=document.getElementById("u_email").value;
+    var k=document.getElementById("u_key").value.toUpperCase();
+    
+    if(e.includes("@") && _0x55.includes(k)){
+        alert("LICENÇA ATIVADA COM SUCESSO!");
+        // Este comando abaixo abre o seu arquivo com as questões
+        window.location.href="portal_neon_pro.html";
+    } else {
+        alert("ACESSO NEGADO: Verifique os dados ou contate o Sr. Carlos Tavares.");
+    }
+}
+</script>
+
+</body>
+</html>
